@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
 
@@ -321,10 +322,24 @@ namespace LanguageIdentification
             else
             {
                 //解压后MemoryStream长度为 7649400 ，初始化一个 7700000 大小的数组，保留一点冗余
-                using var unzipedStream = new MemoryStream(7700000);
-                gzipStream.CopyTo(unzipedStream);
-                unzipedStream.Seek(0, SeekOrigin.Begin);
-                return Deserialize(unzipedStream);
+                const int BufferSize = 7700000;
+
+                //使用非托管内存，以便手动释放
+                var unmanagePtr = Marshal.AllocHGlobal(BufferSize);
+                try
+                {
+                    unsafe
+                    {
+                        using var unzipedStream = new UnmanagedMemoryStream((byte*)unmanagePtr.ToPointer(), 0, BufferSize, FileAccess.ReadWrite);
+                        gzipStream.CopyTo(unzipedStream);
+                        unzipedStream.Seek(0, SeekOrigin.Begin);
+                        return Deserialize(unzipedStream);
+                    }
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(unmanagePtr);
+                }
             }
         }
 
