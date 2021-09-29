@@ -132,6 +132,9 @@ namespace LanguageIdentification
 
         #region Public 方法
 
+        /// <inheritdoc cref="Create(IEnumerable{string})"/>
+        public static LanguageIdentificationModel Create(params string[] languageCodes) => Create(languageCodes as IEnumerable<string>);
+
         /// <summary>
         /// 创建仅支持指定语言的模型
         /// </summary>

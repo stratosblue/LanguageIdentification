@@ -31,6 +31,11 @@ namespace LanguageIdentification
         {
         }
 
+        /// <inheritdoc cref="LanguageIdentificationClassifier(IEnumerable{string})"/>
+        public LanguageIdentificationClassifier(params string[] languageCodes) : this(languageCodes as IEnumerable<string>)
+        {
+        }
+
         /// <summary>
         /// <inheritdoc cref="LanguageIdentificationClassifier"/><para/>
         /// 创建仅支持 <paramref name="languageCodes"/> 中的语言的分类器

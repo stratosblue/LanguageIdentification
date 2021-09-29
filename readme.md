@@ -48,7 +48,7 @@ Console.WriteLine(result);
 
 1. 只加载部分语言支持
 ```C#
-var classifier = new LanguageIdentificationClassifier(new[] { "zh", "en" });
+var classifier = new LanguageIdentificationClassifier("zh", "en");
 langIdClassifier.Append("Hello");
 var result = langIdClassifier.Classify();
 Console.WriteLine(result);

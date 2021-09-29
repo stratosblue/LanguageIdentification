@@ -40,7 +40,7 @@ namespace LanguageIdentification.Test
         [TestMethod]
         public void ShouldOnlyLoadedLanguageReturn()
         {
-            var classifier = new LanguageIdentificationClassifier(new[] { "zh", "en" });
+            var classifier = new LanguageIdentificationClassifier("zh", "en");
 
             foreach (var item in TestData.Items)
             {
