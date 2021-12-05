@@ -10,6 +10,7 @@ using System.Runtime.Serialization;
 using System.Text;
 
 #pragma warning disable CS0659 // 类型重写 Object.Equals(object o)，但不重写 Object.GetHashCode()
+#pragma warning disable IDE1006 // 命名样式
 
 namespace LanguageIdentification
 {
@@ -294,7 +295,7 @@ namespace LanguageIdentification
                 var result = int.MaxValue;
                 foreach (var item in obj)
                 {
-                    result &= item.GetHashCode();
+                    result &= item?.GetHashCode() ?? 0;
                 }
                 return result;
             }
