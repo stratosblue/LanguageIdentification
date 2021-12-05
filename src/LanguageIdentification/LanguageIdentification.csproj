@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <VersionPrefix>1.0.2</VersionPrefix>
+    <IsPackable>true</IsPackable>
     <Description>本地离线运行的语言识别库，移植自langid-java</Description>
 
     <Authors>Stratos</Authors>
