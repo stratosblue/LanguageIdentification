@@ -67,12 +67,3 @@ var classifier = new LanguageIdentificationClassifier(model);
  - 具体各个参数是什么意义。。不清楚。。自行研究源项目。。。
 
 ----
-
-3. 加载默认模型时，使用更少的内存
-
-```C#
-AppContext.SetSwitch("LanguageIdentification:TryLoadModelWithLowMemory", true);
-```
-
- - 在使用前设置开关；
- - 加载时会使用更少的内存，对应的会增加加载时间；

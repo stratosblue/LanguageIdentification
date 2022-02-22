@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace LanguageIdentification.TestConsole
 {
@@ -22,9 +23,13 @@ Sec.IV: INFORMACIÓN DE SOLICITUD Y PRESENTACIÓN...............................
 
         static void Main(string[] args)
         {
-            AppContext.SetSwitch("LanguageIdentification:TryLoadModelWithLowMemory", false);
+            var stopwatch = Stopwatch.StartNew();
 
             var langIdClassifier = new LanguageIdentificationClassifier();
+
+            stopwatch.Stop();
+            Console.WriteLine($"Load Time: {stopwatch.ElapsedMilliseconds}");
+
             langIdClassifier.Append(Text_ES);
             var result = langIdClassifier.Classify();
 
