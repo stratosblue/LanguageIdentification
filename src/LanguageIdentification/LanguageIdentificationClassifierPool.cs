@@ -11,8 +11,8 @@ namespace LanguageIdentification
     {
         #region Private 字段
 
-        private readonly ConcurrentBag<LanguageIdentificationClassifier> _items = new();
-        private readonly int _maxRemainCount;
+        private readonly ConcurrentBag<ILanguageIdentificationClassifier> _items = new();
+        private readonly int _maxRetainCount;
         private int _count;
 
         #endregion Private 字段
@@ -31,14 +31,14 @@ namespace LanguageIdentification
         /// <summary>
         /// <inheritdoc cref="LanguageIdentificationClassifierPool"/>
         /// </summary>
-        /// <param name="maxRemainCount">最大保留大小</param>
-        public LanguageIdentificationClassifierPool(int maxRemainCount)
+        /// <param name="maxRetainCount">最大保留大小</param>
+        public LanguageIdentificationClassifierPool(int maxRetainCount)
         {
-            if (maxRemainCount < 1)
+            if (maxRetainCount < 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(maxRemainCount), "min value is 1.");
+                throw new ArgumentOutOfRangeException(nameof(maxRetainCount), "min value is 1.");
             }
-            _maxRemainCount = maxRemainCount;
+            _maxRetainCount = maxRetainCount;
         }
 
         #endregion Public 构造函数
@@ -66,10 +66,10 @@ namespace LanguageIdentification
         }
 
         /// <summary>
-        /// 借用一个 <see cref="LanguageIdentificationClassifier"/>
+        /// 借用一个 <see cref="ILanguageIdentificationClassifier"/>
         /// </summary>
         /// <returns></returns>
-        public LanguageIdentificationClassifier Rent()
+        public ILanguageIdentificationClassifier Rent()
         {
             if (_items.TryTake(out var item))
             {
@@ -80,17 +80,17 @@ namespace LanguageIdentification
         }
 
         /// <summary>
-        /// 归还一个 <see cref="LanguageIdentificationClassifier"/>
+        /// 归还一个 <see cref="ILanguageIdentificationClassifier"/>
         /// </summary>
         /// <param name="item"></param>
-        public void Return(LanguageIdentificationClassifier item)
+        public void Return(ILanguageIdentificationClassifier item)
         {
             if (item is null)
             {
                 throw new ArgumentNullException(nameof(item));
             }
 
-            if (Interlocked.Increment(ref _count) <= _maxRemainCount)
+            if (Interlocked.Increment(ref _count) <= _maxRetainCount)
             {
                 item.Reset();
                 _items.Add(item);
@@ -105,9 +105,9 @@ namespace LanguageIdentification
         /// 创建分类器
         /// </summary>
         /// <returns></returns>
-        protected virtual LanguageIdentificationClassifier CreateClassifier()
+        protected virtual ILanguageIdentificationClassifier CreateClassifier()
         {
-            return new();
+            return new LanguageIdentificationClassifier();
         }
 
         #endregion Protected 方法

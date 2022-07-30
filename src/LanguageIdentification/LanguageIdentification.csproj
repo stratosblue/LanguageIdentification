@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <VersionPrefix>1.0.3</VersionPrefix>
+    <VersionPrefix>1.1.0</VersionPrefix>
     <IsPackable>true</IsPackable>
-    <Description>本地离线运行的语言识别库，移植自langid-java</Description>
+    <Description>.NET Port of Language Identification Library for langid-java. 移植自langid-java的语言识别库。</Description>
 
     <Authors>Stratos</Authors>
 
@@ -37,6 +37,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>LanguageIdentification.Test</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">

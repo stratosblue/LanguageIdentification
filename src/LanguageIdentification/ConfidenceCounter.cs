@@ -7,9 +7,9 @@ namespace LanguageIdentification
         #region Private 字段
 
         private readonly int _classesCount;
+        private readonly IFixedSizeArrayPool<float> _confidenceArrayPool;
         private readonly int[] _counts;
         private readonly int[] _dense;
-
         private readonly int _featuresCount;
         private readonly LanguageIdentificationModel _langIdModel;
         private readonly float[] _origin_nb_pc;
@@ -17,14 +17,13 @@ namespace LanguageIdentification
         private readonly int[] _sparse;
         private int _elementsCount;
 
-        private readonly float[] _scratchPdc;
-
         #endregion Private 字段
 
         #region Public 构造函数
 
-        public ConfidenceCounter(LanguageIdentificationModel langIdModel)
+        public ConfidenceCounter(IFixedSizeArrayPool<float> confidenceArrayPool, LanguageIdentificationModel langIdModel)
         {
+            _confidenceArrayPool = confidenceArrayPool ?? throw new ArgumentNullException(nameof(confidenceArrayPool));
             _langIdModel = langIdModel ?? throw new ArgumentNullException(nameof(langIdModel));
 
             _featuresCount = _langIdModel.FeaturesCount;
@@ -34,7 +33,6 @@ namespace LanguageIdentification
             _dense = new int[_featuresCount];
             _counts = new int[_featuresCount];
 
-            _scratchPdc = new float[_classesCount];
             _origin_nb_pc = _langIdModel.nb_pc;
             _origin_nb_ptc = _langIdModel.nb_ptc;
         }
@@ -68,7 +66,7 @@ namespace LanguageIdentification
         public float[] NaiveBayesClassConfidence()
         {
             // Reuse scratch and initialize with nb_pc
-            var pdc = _scratchPdc;
+            var pdc = _confidenceArrayPool.Rent();
 
             Array.Copy(_origin_nb_pc, 0, pdc, 0, pdc.Length);
 

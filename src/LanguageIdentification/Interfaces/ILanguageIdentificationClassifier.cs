@@ -40,13 +40,13 @@ namespace LanguageIdentification
         /// 依据当前已添加到分类器的文本，分类并获取最高可能性的语言
         /// </summary>
         /// <returns></returns>
-        LanguageDetectionResult Classify();
+        ILanguageDetectionResult Classify();
 
         /// <summary>
         /// 创建所有支持语言的置信度数据
         /// </summary>
-        /// <returns>所有支持语言的置信度数据（未排序）</returns>
-        IEnumerable<LanguageDetectionResult> CreateRank();
+        /// <returns>所有支持语言的置信度数据（可能未排序）</returns>
+        ILanguageDetectionResultRank CreateRank();
 
         /// <summary>
         /// 获取所有支持的语言

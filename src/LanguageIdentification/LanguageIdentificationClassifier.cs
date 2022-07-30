@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+
+using LanguageIdentification.Internal;
 
 namespace LanguageIdentification
 {
@@ -16,6 +17,7 @@ namespace LanguageIdentification
 
         private static readonly Encoding s_encoding = Encoding.UTF8;
 
+        private readonly FixedSizeArrayPool<float> _confidenceArrayPool;
         private readonly ConfidenceCounter _counter;
         private readonly LanguageIdentificationModel _model;
 
@@ -51,9 +53,9 @@ namespace LanguageIdentification
         /// <param name="model"></param>
         public LanguageIdentificationClassifier(LanguageIdentificationModel model)
         {
-            _model = model;
-
-            _counter = new ConfidenceCounter(model);
+            _model = model ?? throw new ArgumentNullException(nameof(model));
+            _confidenceArrayPool = new(model.ClassesCount, Environment.ProcessorCount);
+            _counter = new ConfidenceCounter(_confidenceArrayPool, model);
         }
 
         #endregion Public 构造函数
@@ -120,7 +122,7 @@ namespace LanguageIdentification
         #region Public 方法
 
         /// <inheritdoc/>
-        public LanguageDetectionResult Classify()
+        public ILanguageDetectionResult Classify()
         {
             var confidences = _counter.NaiveBayesClassConfidence();
 
@@ -136,15 +138,14 @@ namespace LanguageIdentification
                 }
             }
 
-            return new LanguageDetectionResult(_model.LanguageClasses[index], confidences, index);
+            return new PooledConfidenceLanguageDetectionResult(_model.LanguageClasses[index], index, confidences, _confidenceArrayPool);
         }
 
         /// <inheritdoc/>
-        public IEnumerable<LanguageDetectionResult> CreateRank()
+        public ILanguageDetectionResultRank CreateRank()
         {
             var confidences = _counter.NaiveBayesClassConfidence();
-            confidences = (float[])confidences.Clone();
-            return confidences.Select((item, index) => new LanguageDetectionResult(_model.LanguageClasses[index], confidences, index));
+            return new LanguageDetectionResultRank(_model.LanguageClasses, confidences, _confidenceArrayPool);
         }
 
         /// <summary>
@@ -163,19 +164,21 @@ namespace LanguageIdentification
 
         #region Static
 
-        /// <summary>
-        /// 分类并获取 <paramref name="text"/> 最高可能性的语言
-        /// </summary>
-        /// <param name="text">需要识别的文本数据</param>
-        /// <returns></returns>
-        public static LanguageDetectionResult Classify(string text) => Classify(text.AsSpan());
+        #region Classify
 
         /// <summary>
         /// 分类并获取 <paramref name="text"/> 最高可能性的语言
         /// </summary>
         /// <param name="text">需要识别的文本数据</param>
         /// <returns></returns>
-        public static LanguageDetectionResult Classify(ReadOnlySpan<char> text)
+        public static ILanguageDetectionResult Classify(string text) => Classify(text.AsSpan());
+
+        /// <summary>
+        /// 分类并获取 <paramref name="text"/> 最高可能性的语言
+        /// </summary>
+        /// <param name="text">需要识别的文本数据</param>
+        /// <returns></returns>
+        public static ILanguageDetectionResult Classify(ReadOnlySpan<char> text)
         {
             var classifier = LanguageIdentificationClassifierPool.Default.Rent();
             try
@@ -196,14 +199,14 @@ namespace LanguageIdentification
         /// <param name="start"><paramref name="buffer"/>中的起始索引</param>
         /// <param name="length"><paramref name="buffer"/>中的数据长度</param>
         /// <returns></returns>
-        public static LanguageDetectionResult Classify(byte[] buffer, int start, int length) => Classify(new ReadOnlySpan<byte>(buffer, start, length));
+        public static ILanguageDetectionResult Classify(byte[] buffer, int start, int length) => Classify(new ReadOnlySpan<byte>(buffer, start, length));
 
         /// <summary>
         /// 分类并获取 <paramref name="buffer"/> 最高可能性的语言
         /// </summary>
         /// <param name="buffer">文本的UTF8编码数据</param>
         /// <returns></returns>
-        public static LanguageDetectionResult Classify(ReadOnlySpan<byte> buffer)
+        public static ILanguageDetectionResult Classify(ReadOnlySpan<byte> buffer)
         {
             var classifier = LanguageIdentificationClassifierPool.Default.Rent();
             try
@@ -216,6 +219,66 @@ namespace LanguageIdentification
                 LanguageIdentificationClassifierPool.Default.Return(classifier);
             }
         }
+
+        #endregion Classify
+
+        #region CreateRank
+
+        /// <summary>
+        /// 分类并获取 <paramref name="text"/> 结果
+        /// </summary>
+        /// <param name="text">需要识别的文本数据</param>
+        /// <returns></returns>
+        public static ILanguageDetectionResultRank CreateRank(string text) => CreateRank(text.AsSpan());
+
+        /// <summary>
+        /// 分类并获取 <paramref name="text"/> 结果
+        /// </summary>
+        /// <param name="text">需要识别的文本数据</param>
+        /// <returns></returns>
+        public static ILanguageDetectionResultRank CreateRank(ReadOnlySpan<char> text)
+        {
+            var classifier = LanguageIdentificationClassifierPool.Default.Rent();
+            try
+            {
+                classifier.Append(text);
+                return classifier.CreateRank();
+            }
+            finally
+            {
+                LanguageIdentificationClassifierPool.Default.Return(classifier);
+            }
+        }
+
+        /// <summary>
+        /// 分类并获取 <paramref name="buffer"/> 结果
+        /// </summary>
+        /// <param name="buffer">文本的UTF8编码数据buffer</param>
+        /// <param name="start"><paramref name="buffer"/>中的起始索引</param>
+        /// <param name="length"><paramref name="buffer"/>中的数据长度</param>
+        /// <returns></returns>
+        public static ILanguageDetectionResultRank CreateRank(byte[] buffer, int start, int length) => CreateRank(new ReadOnlySpan<byte>(buffer, start, length));
+
+        /// <summary>
+        /// 分类并获取 <paramref name="buffer"/> 结果
+        /// </summary>
+        /// <param name="buffer">文本的UTF8编码数据</param>
+        /// <returns></returns>
+        public static ILanguageDetectionResultRank CreateRank(ReadOnlySpan<byte> buffer)
+        {
+            var classifier = LanguageIdentificationClassifierPool.Default.Rent();
+            try
+            {
+                classifier.Append(buffer);
+                return classifier.CreateRank();
+            }
+            finally
+            {
+                LanguageIdentificationClassifierPool.Default.Return(classifier);
+            }
+        }
+
+        #endregion CreateRank
 
         /// <summary>
         /// 获取所有支持的语言
