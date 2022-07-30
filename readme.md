@@ -24,7 +24,7 @@ Install-Package LanguageIdentification
 ```C#
 var langIdClassifier = new LanguageIdentificationClassifier();
 langIdClassifier.Append("Hello");
-var result = langIdClassifier.Classify();
+using var result = langIdClassifier.Classify();
 Console.WriteLine(result);
 ```
 
@@ -35,7 +35,7 @@ Console.WriteLine(result);
 
 2. 通过静态方法使用
 ```C#
-var result = LanguageIdentificationClassifier.Classify("Hello");
+using var result = LanguageIdentificationClassifier.Classify("Hello");
 Console.WriteLine(result);
 ```
 
@@ -50,7 +50,7 @@ Console.WriteLine(result);
 ```C#
 var classifier = new LanguageIdentificationClassifier("zh", "en");
 langIdClassifier.Append("Hello");
-var result = langIdClassifier.Classify();
+using var result = langIdClassifier.Classify();
 Console.WriteLine(result);
 ```
  - 速度会更快；

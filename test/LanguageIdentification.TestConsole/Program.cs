@@ -31,11 +31,11 @@ Sec.IV: INFORMACIÓN DE SOLICITUD Y PRESENTACIÓN...............................
         Console.WriteLine($"Load Time: {stopwatch.ElapsedMilliseconds}");
 
         langIdClassifier.Append(Text_ES);
-        var result = langIdClassifier.Classify();
+        using var result = langIdClassifier.Classify();
 
         Console.WriteLine(result);
         Console.WriteLine("---- Rank ----");
-        var detectedLanguages = langIdClassifier.CreateRank();
+        using var detectedLanguages = langIdClassifier.CreateRank();
         foreach (var item in detectedLanguages)
         {
             Console.WriteLine(item);

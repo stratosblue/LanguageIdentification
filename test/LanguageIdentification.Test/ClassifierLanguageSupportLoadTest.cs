@@ -22,14 +22,14 @@ public class ClassifierLanguageSupportLoadTest
             defaultClassifier.Reset();
 
             defaultClassifier.Append(item.Text);
-            var defaultClassifierResult = defaultClassifier.Classify();
+            using var defaultClassifierResult = defaultClassifier.Classify();
 
             Assert.AreEqual(item.LanguageCode, defaultClassifierResult.LanguageCode);
 
             var portionClassifier = new LanguageIdentificationClassifier(allSupportedLanguages.Where(m => m != defaultClassifierResult.LanguageCode));
 
             portionClassifier.Append(item.Text);
-            var portionClassifierResult = portionClassifier.Classify();
+            using var portionClassifierResult = portionClassifier.Classify();
 
             Assert.AreNotEqual(defaultClassifierResult.LanguageCode, portionClassifierResult.LanguageCode);
 
@@ -46,7 +46,7 @@ public class ClassifierLanguageSupportLoadTest
         {
             classifier.Reset();
             classifier.Append(item.Text);
-            var result = classifier.Classify();
+            using var result = classifier.Classify();
 
             Assert.IsTrue(result.LanguageCode == "zh" || result.LanguageCode == "en");
 

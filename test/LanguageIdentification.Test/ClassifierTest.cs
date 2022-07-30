@@ -96,8 +96,8 @@ public class LanguageIdentificationClassifierTest
             langIdClassifier.Append(item.Text);
             using var result = langIdClassifier.Classify();
 
-            var rank = langIdClassifier.CreateRank().ToArray();
-            Assert.AreEqual(supportedLanguageCount, rank.Length);
+            using var rank = langIdClassifier.CreateRank();
+            Assert.AreEqual(supportedLanguageCount, rank.Count);
 
             langIdClassifier.Reset();
         }
@@ -138,7 +138,7 @@ public class LanguageIdentificationClassifierTest
         foreach (var item in TestData.Items)
         {
             langIdClassifier.Append(item.Text);
-            var result = langIdClassifier.Classify();
+            using var result = langIdClassifier.Classify();
 
             result.Dispose();
 

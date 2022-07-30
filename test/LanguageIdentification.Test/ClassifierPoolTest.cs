@@ -15,7 +15,7 @@ public class LanguageIdentificationClassifierPoolTest
     {
         foreach (var item in TestData.Items)
         {
-            var result = LanguageIdentificationClassifier.Classify(item.Text);
+            using var result = LanguageIdentificationClassifier.Classify(item.Text);
             Assert.AreEqual(item.LanguageCode, result.LanguageCode);
 
             Console.WriteLine(result);
