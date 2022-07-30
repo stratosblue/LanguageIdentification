@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace LanguageIdentification.TestConsole
+namespace LanguageIdentification.TestConsole;
+
+class Program
 {
-    class Program
-    {
-        public const string Text_ES = @"Tabla de contenidos
+    public const string Text_ES = @"Tabla de contenidos
 Parte I: Información general ...................................................................................................................3
 Parte II: Texto completo del anuncio.........................................................................................................4
 Sec.I: DESCRIPCIÓN DE LA OPORTUNIDAD DE FINANCIACIÓN........................................4
@@ -21,26 +21,25 @@ organizacionales ...............................................................
 C. Compartimiento/Costes ................................................................................................................29
 Sec.IV: INFORMACIÓN DE SOLICITUD Y PRESENTACIÓN..............................................29";
 
-        static void Main(string[] args)
+    static void Main(string[] args)
+    {
+        var stopwatch = Stopwatch.StartNew();
+
+        var langIdClassifier = new LanguageIdentificationClassifier();
+
+        stopwatch.Stop();
+        Console.WriteLine($"Load Time: {stopwatch.ElapsedMilliseconds}");
+
+        langIdClassifier.Append(Text_ES);
+        var result = langIdClassifier.Classify();
+
+        Console.WriteLine(result);
+        Console.WriteLine("---- Rank ----");
+        var detectedLanguages = langIdClassifier.CreateRank();
+        foreach (var item in detectedLanguages)
         {
-            var stopwatch = Stopwatch.StartNew();
-
-            var langIdClassifier = new LanguageIdentificationClassifier();
-
-            stopwatch.Stop();
-            Console.WriteLine($"Load Time: {stopwatch.ElapsedMilliseconds}");
-
-            langIdClassifier.Append(Text_ES);
-            var result = langIdClassifier.Classify();
-
-            Console.WriteLine(result);
-            Console.WriteLine("---- Rank ----");
-            var detectedLanguages = langIdClassifier.CreateRank();
-            foreach (var item in detectedLanguages)
-            {
-                Console.WriteLine(item);
-            }
-            Console.ReadLine();
+            Console.WriteLine(item);
         }
+        Console.ReadLine();
     }
 }

@@ -3,60 +3,59 @@ using System.Linq;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace LanguageIdentification.Test
+namespace LanguageIdentification.Test;
+
+[TestClass]
+public class ClassifierLanguageSupportLoadTest
 {
-    [TestClass]
-    public class ClassifierLanguageSupportLoadTest
+    #region Public 方法
+
+    [TestMethod]
+    public void ShouldDetectionFailWithOutLanguageLoaded()
     {
-        #region Public 方法
+        var allSupportedLanguages = LanguageIdentificationClassifier.GetAllSupportedLanguages();
 
-        [TestMethod]
-        public void ShouldDetectionFailWithOutLanguageLoaded()
+        var defaultClassifier = new LanguageIdentificationClassifier();
+
+        foreach (var item in TestData.Items)
         {
-            var allSupportedLanguages = LanguageIdentificationClassifier.GetAllSupportedLanguages();
+            defaultClassifier.Reset();
 
-            var defaultClassifier = new LanguageIdentificationClassifier();
+            defaultClassifier.Append(item.Text);
+            var defaultClassifierResult = defaultClassifier.Classify();
 
-            foreach (var item in TestData.Items)
-            {
-                defaultClassifier.Reset();
+            Assert.AreEqual(item.LanguageCode, defaultClassifierResult.LanguageCode);
 
-                defaultClassifier.Append(item.Text);
-                var defaultClassifierResult = defaultClassifier.Classify();
+            var portionClassifier = new LanguageIdentificationClassifier(allSupportedLanguages.Where(m => m != defaultClassifierResult.LanguageCode));
 
-                Assert.AreEqual(item.LanguageCode, defaultClassifierResult.LanguageCode);
+            portionClassifier.Append(item.Text);
+            var portionClassifierResult = portionClassifier.Classify();
 
-                var portionClassifier = new LanguageIdentificationClassifier(allSupportedLanguages.Where(m => m != defaultClassifierResult.LanguageCode));
+            Assert.AreNotEqual(defaultClassifierResult.LanguageCode, portionClassifierResult.LanguageCode);
 
-                portionClassifier.Append(item.Text);
-                var portionClassifierResult = portionClassifier.Classify();
-
-                Assert.AreNotEqual(defaultClassifierResult.LanguageCode, portionClassifierResult.LanguageCode);
-
-                Console.WriteLine($"default: {defaultClassifierResult} , portion: {portionClassifierResult}");
-            }
+            Console.WriteLine($"default: {defaultClassifierResult} , portion: {portionClassifierResult}");
         }
-
-        [TestMethod]
-        public void ShouldOnlyLoadedLanguageReturn()
-        {
-            var classifier = new LanguageIdentificationClassifier("zh", "en");
-
-            foreach (var item in TestData.Items)
-            {
-                classifier.Reset();
-                classifier.Append(item.Text);
-                var result = classifier.Classify();
-
-                Assert.IsTrue(result.LanguageCode == "zh" || result.LanguageCode == "en");
-
-                if (item.LanguageCode == "zh" || item.LanguageCode == "en")
-                {
-                    Assert.AreEqual(item.LanguageCode, result.LanguageCode);
-                }
-            }
-        }
-
-        #endregion Public 方法
     }
+
+    [TestMethod]
+    public void ShouldOnlyLoadedLanguageReturn()
+    {
+        var classifier = new LanguageIdentificationClassifier("zh", "en");
+
+        foreach (var item in TestData.Items)
+        {
+            classifier.Reset();
+            classifier.Append(item.Text);
+            var result = classifier.Classify();
+
+            Assert.IsTrue(result.LanguageCode == "zh" || result.LanguageCode == "en");
+
+            if (item.LanguageCode == "zh" || item.LanguageCode == "en")
+            {
+                Assert.AreEqual(item.LanguageCode, result.LanguageCode);
+            }
+        }
+    }
+
+    #endregion Public 方法
 }
