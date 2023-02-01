@@ -95,10 +95,7 @@ internal sealed class LanguageDetectionResultRank : ILanguageDetectionResultRank
         if (!_isDisposed)
         {
             _isDisposed = true;
-            if (_confidenceArrayPool is not null)
-            {
-                _confidenceArrayPool.Return(Confidences);
-            }
+            _confidenceArrayPool?.Return(Confidences);
         }
     }
 
