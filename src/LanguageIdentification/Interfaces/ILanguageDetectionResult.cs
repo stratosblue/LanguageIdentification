@@ -5,7 +5,7 @@ namespace LanguageIdentification;
 /// <summary>
 /// 语言检测结果
 /// </summary>
-public interface ILanguageDetectionResult: IDisposable
+public interface ILanguageDetectionResult : IDisposable
 {
     #region Public 属性
 
