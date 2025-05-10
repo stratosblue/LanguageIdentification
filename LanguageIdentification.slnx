@@ -1,0 +1,21 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="CodeMaid.config" />
+    <File Path="Directory.Build.props" />
+    <File Path="global.json" />
+    <File Path="LICENSE" />
+    <File Path="readme.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/LanguageIdentification/LanguageIdentification.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/LanguageIdentification.Test/LanguageIdentification.Test.csproj" />
+    <Project Path="test/LanguageIdentification.TestConsole/LanguageIdentification.TestConsole.csproj" />
+  </Folder>
+  <Folder Name="/tool/">
+    <Project Path="tool/ModelDataGenerator/ModelDataGenerator.csproj" />
+  </Folder>
+</Solution>
