@@ -1,6 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <VersionPrefix>1.1.2</VersionPrefix>
+    <TargetFrameworks>net8.0;net9.0;netstandard2.0</TargetFrameworks>
+
+    <VersionPrefix>1.2.0</VersionPrefix>
     <IsPackable>true</IsPackable>
     <Description>.NET Port of Language Identification Library for langid-java. 移植自langid-java的语言识别库。</Description>
 
@@ -18,6 +20,10 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    
+    <IsAotCompatible>true</IsAotCompatible>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <NoWarn>$(NoWarn);NETSDK1210</NoWarn>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
@@ -25,18 +31,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\langid-model-data" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <None Include="..\..\readme.md" Link="readme.md" Pack="true" PackagePath="/" />
-
-    <Compile Update="Resource.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resource.resx</DependentUpon>
-    </Compile>
-
-    <EmbeddedResource Update="Resource.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resource.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
 
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>LanguageIdentification.Test</_Parameter1>
@@ -56,4 +55,12 @@
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
+
+  <!--生成文件-->
+  <Target Name="_LanguageIdentificationDataGenerate" BeforeTargets="DispatchToInnerBuilds">
+    <Exec Command="dotnet run --project ../../tool/ModelDataGenerator/ModelDataGenerator.csproj -c Release -e OUTPUT_DIR=&quot;$(MSBuildThisFileDirectory)Resources&quot;" ContinueOnError="true">
+      <Output TaskParameter="ExitCode" PropertyName="LMDGenerateErrorCode" />
+    </Exec>
+    <Error Condition="'$(LMDGenerateErrorCode)' != '0'" Text="langid-model-data generate failed." />
+  </Target>
 </Project>

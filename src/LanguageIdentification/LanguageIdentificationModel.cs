@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 
@@ -64,13 +65,15 @@ public sealed class LanguageIdentificationModel : IEquatable<LanguageIdentificat
     {
         get
         {
-            if (s_defaultModelReference.TryGetTarget(out var defaultModel))
+            if (s_defaultModelReference.TryGetTarget(out var defaultModel)
+                && defaultModel is not null)
             {
                 return defaultModel;
             }
             lock (s_defaultModelReference)
             {
-                if (s_defaultModelReference.TryGetTarget(out defaultModel))
+                if (s_defaultModelReference.TryGetTarget(out defaultModel)
+                    && defaultModel is not null)
                 {
                     return defaultModel;
                 }
@@ -289,8 +292,13 @@ public sealed class LanguageIdentificationModel : IEquatable<LanguageIdentificat
                    && Enumerable.SequenceEqual(x, y);
         }
 
-        public int GetHashCode(T[] obj)
+        /// <inheritdoc/>
+        public int GetHashCode(T[]? obj)
         {
+            if (obj is null)
+            {
+                return 0;
+            }
             var result = int.MaxValue;
             foreach (var item in obj)
             {
@@ -314,8 +322,10 @@ public sealed class LanguageIdentificationModel : IEquatable<LanguageIdentificat
     /// <returns></returns>
     private static LanguageIdentificationModel InternalLoadDefaultModel()
     {
-        using var stream = new MemoryStream(Resource.ModelData);
-        using var gzipStream = new GZipStream(stream, CompressionMode.Decompress);
+        using var modelDataStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("LanguageIdentification.Resources.langid-model-data")
+                                    ?? throw new InvalidOperationException("Can not load langid-model-data in embedded resource. The referenced library is invalid.");
+
+        using var gzipStream = new GZipStream(modelDataStream, CompressionMode.Decompress);
         using var bufferedStream = new BufferedStream(gzipStream);
 
         return Deserialize(bufferedStream);
