@@ -30,7 +30,7 @@ internal class Program
         memoryStream.Seek(0, SeekOrigin.Begin);
 
         using var targetStream = File.OpenWrite("langid-model-data");
-        using var targetGzipStream = new GZipStream(targetStream, CompressionLevel.Optimal);
+        using var targetGzipStream = new GZipStream(targetStream, CompressionLevel.SmallestSize);
 
         memoryStream.CopyTo(targetGzipStream);
 

@@ -1,7 +1,5 @@
 ﻿using System.IO;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 namespace LanguageIdentification.Test;
 
 [TestClass]

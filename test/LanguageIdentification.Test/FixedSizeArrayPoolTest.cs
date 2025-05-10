@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 
 using LanguageIdentification.Internal;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 namespace LanguageIdentification.Test;
 
 [TestClass]
